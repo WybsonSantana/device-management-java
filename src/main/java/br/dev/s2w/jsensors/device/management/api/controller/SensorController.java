@@ -6,9 +6,11 @@ import br.dev.s2w.jsensors.device.management.common.IdGenerator;
 import br.dev.s2w.jsensors.device.management.domain.model.Sensor;
 import br.dev.s2w.jsensors.device.management.domain.model.SensorId;
 import br.dev.s2w.jsensors.device.management.domain.repository.SensorRepository;
+import io.hypersistence.tsid.TSID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/api/sensors")
@@ -16,6 +18,14 @@ import org.springframework.web.bind.annotation.*;
 public class SensorController {
 
     private final SensorRepository sensorRepository;
+
+    @GetMapping("/{sensorId}")
+    public SensorOutput getOne(@PathVariable TSID sensorId) {
+        Sensor sensor = sensorRepository.findById(new SensorId(sensorId))
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        return convertToModel(sensor);
+    }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
