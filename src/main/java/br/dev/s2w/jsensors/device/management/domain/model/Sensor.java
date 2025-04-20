@@ -30,6 +30,6 @@ public class Sensor {
 
     private String model;
 
-    private boolean enabled;
+    private Boolean enabled;
 
 }
