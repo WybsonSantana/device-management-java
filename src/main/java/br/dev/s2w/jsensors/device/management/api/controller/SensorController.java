@@ -1,5 +1,6 @@
 package br.dev.s2w.jsensors.device.management.api.controller;
 
+import br.dev.s2w.jsensors.device.management.api.client.SensorMonitoringClient;
 import br.dev.s2w.jsensors.device.management.api.model.SensorInput;
 import br.dev.s2w.jsensors.device.management.api.model.SensorOutput;
 import br.dev.s2w.jsensors.device.management.common.IdGenerator;
@@ -21,6 +22,8 @@ import org.springframework.web.server.ResponseStatusException;
 public class SensorController {
 
     private final SensorRepository sensorRepository;
+
+    private final SensorMonitoringClient sensorMonitoringClient;
 
     @GetMapping
     public Page<SensorOutput> search(@PageableDefault Pageable pageable) {
@@ -89,6 +92,8 @@ public class SensorController {
         sensor.setEnabled(true);
 
         sensorRepository.save(sensor);
+
+        sensorMonitoringClient.enableMonitoring(sensorId);
     }
 
     @DeleteMapping("/{sensorId}/enable")
@@ -100,6 +105,8 @@ public class SensorController {
         sensor.setEnabled(false);
 
         sensorRepository.save(sensor);
+
+        sensorMonitoringClient.disableMonitoring(sensorId);
     }
 
     private SensorOutput convertToModel(Sensor sensor) {
