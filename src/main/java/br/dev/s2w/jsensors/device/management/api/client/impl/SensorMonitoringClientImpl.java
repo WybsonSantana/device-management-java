@@ -4,8 +4,12 @@ import br.dev.s2w.jsensors.device.management.api.client.SensorMonitoringClient;
 import br.dev.s2w.jsensors.device.management.api.client.SensorMonitoringClientBadGatewayException;
 import io.hypersistence.tsid.TSID;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
+
+import java.time.Duration;
 
 @Component
 public class SensorMonitoringClientImpl implements SensorMonitoringClient {
@@ -14,8 +18,9 @@ public class SensorMonitoringClientImpl implements SensorMonitoringClient {
 
     public SensorMonitoringClientImpl(RestClient.Builder builder) {
         this.restClient = builder.baseUrl("http://localhost:8082")
-                .defaultStatusHandler(HttpStatusCode::isError, (request,    response) -> {
-throw new SensorMonitoringClientBadGatewayException();
+                .requestFactory(generateClientHttpRequestFactory())
+                .defaultStatusHandler(HttpStatusCode::isError, (request, response) -> {
+                    throw new SensorMonitoringClientBadGatewayException();
                 })
                 .build();
     }
@@ -34,6 +39,15 @@ throw new SensorMonitoringClientBadGatewayException();
                 .uri("/api/sensors/{sensorId}/monitoring/enable", sensorId)
                 .retrieve()
                 .toBodilessEntity();
+    }
+
+    private ClientHttpRequestFactory generateClientHttpRequestFactory() {
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+
+        factory.setReadTimeout(Duration.ofSeconds(5));
+        factory.setConnectTimeout(Duration.ofSeconds(3));
+
+        return factory;
     }
 
 }
