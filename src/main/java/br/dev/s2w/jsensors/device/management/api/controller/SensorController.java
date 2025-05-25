@@ -1,7 +1,9 @@
 package br.dev.s2w.jsensors.device.management.api.controller;
 
 import br.dev.s2w.jsensors.device.management.api.client.SensorMonitoringClient;
+import br.dev.s2w.jsensors.device.management.api.model.SensorDetailOutput;
 import br.dev.s2w.jsensors.device.management.api.model.SensorInput;
+import br.dev.s2w.jsensors.device.management.api.model.SensorMonitoringOutput;
 import br.dev.s2w.jsensors.device.management.api.model.SensorOutput;
 import br.dev.s2w.jsensors.device.management.common.IdGenerator;
 import br.dev.s2w.jsensors.device.management.domain.model.Sensor;
@@ -38,6 +40,20 @@ public class SensorController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
         return convertToModel(sensor);
+    }
+
+    @GetMapping("{sensorId}/detail")
+    public SensorDetailOutput getOneWithDetail(@PathVariable TSID sensorId) {
+        Sensor sensor = sensorRepository.findById(new SensorId(sensorId))
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        SensorMonitoringOutput monitoringOutput = sensorMonitoringClient.getDetail(sensorId);
+        SensorOutput sensorOutput = convertToModel(sensor);
+
+            return SensorDetailOutput.builder()
+                .sensor(sensorOutput)
+                .monitoring(monitoringOutput)
+                .build();
     }
 
     @PostMapping
